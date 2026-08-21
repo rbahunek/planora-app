@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { StatusBadge } from "@/components/StatusBadge";
+import { IconPlus } from "@/components/icons";
+import { PageHeader, UserAvatar } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { roleLabel } from "@/lib/labels";
 import { listUsers } from "@/server/user-service";
@@ -17,23 +19,24 @@ export default async function UsersPage() {
   const users = await listUsers();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Korisnici</h1>
-        <Link
-          href="/admin/korisnici/novi"
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-        >
-          Novi korisnik
-        </Link>
-      </div>
+    <div className="flex flex-col gap-7">
+      <PageHeader
+        eyebrow="Administracija"
+        title="Korisnici"
+        subtitle={`${users.length} korisnika u sustavu.`}
+        actions={
+          <Link href="/admin/korisnici/novi" className="btn btn-primary">
+            <IconPlus size={16} />
+            Novi korisnik
+          </Link>
+        }
+      />
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+      <div className="card overflow-x-auto">
+        <table className="w-full min-w-[680px] text-left text-sm">
+          <thead className="border-border bg-surface text-fg-subtle sticky top-0 border-b text-xs tracking-wide uppercase">
             <tr>
-              <th className="px-4 py-3 font-medium">Ime i prezime</th>
-              <th className="px-4 py-3 font-medium">E-mail</th>
+              <th className="px-4 py-3 font-medium">Korisnik</th>
               <th className="px-4 py-3 font-medium">Uloga</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Zadnja prijava</th>
@@ -43,24 +46,29 @@ export default async function UsersPage() {
             {users.map((user) => (
               <tr
                 key={user.id}
-                className="border-b border-slate-100 last:border-0 dark:border-slate-800"
+                className="border-border hover:bg-surface-hover border-b transition-colors last:border-0"
               >
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/korisnici/${user.id}`}
-                    className="font-medium text-slate-900 hover:underline dark:text-slate-100"
+                    className="group flex items-center gap-3"
                   >
-                    {user.firstName} {user.lastName}
+                    <UserAvatar firstName={user.firstName} lastName={user.lastName} size={34} />
+                    <span className="min-w-0">
+                      <span className="text-fg group-hover:text-accent block truncate font-medium">
+                        {user.firstName} {user.lastName}
+                      </span>
+                      <span className="mono text-fg-subtle block truncate text-xs">
+                        {user.email}
+                      </span>
+                    </span>
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{user.email}</td>
-                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                  {roleLabel(user.role.name)}
-                </td>
+                <td className="text-fg-muted px-4 py-3">{roleLabel(user.role.name)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={user.accountStatus} />
                 </td>
-                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                <td className="mono text-fg-muted px-4 py-3 text-xs">
                   {user.lastLoginAt ? dateFmt.format(user.lastLoginAt) : "—"}
                 </td>
               </tr>

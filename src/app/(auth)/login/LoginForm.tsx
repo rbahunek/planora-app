@@ -15,9 +15,15 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     <form action={formAction} className="flex flex-col gap-4">
       {state.error ? <Alert>{state.error}</Alert> : null}
       {callbackUrl ? <input type="hidden" name="callbackUrl" value={callbackUrl} /> : null}
-      <FormField id="email" label="E-mail" type="email" autoComplete="email" />
+      <FormField
+        id="email"
+        label="E-mail"
+        type="email"
+        autoComplete="email"
+        placeholder="ime.prezime@example.com"
+      />
       <FormField id="password" label="Lozinka" type="password" autoComplete="current-password" />
-      <SubmitButton>Prijava</SubmitButton>
+      <SubmitButton className="mt-1 w-full">Prijava</SubmitButton>
     </form>
   );
 }

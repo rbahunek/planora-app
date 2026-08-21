@@ -23,11 +23,9 @@ type PanelUser = {
   roleId: string;
 };
 
-const inputClass =
-  "rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100";
+const inputClass = "input";
 
-const sectionClass =
-  "flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900";
+const sectionClass = "card flex flex-col gap-4 p-6";
 
 export function UserAdminPanel({
   user,
@@ -58,18 +56,13 @@ export function UserAdminPanel({
     <div className="flex flex-col gap-6">
       {/* Edit name + role */}
       <form action={updateFormAction} className={sectionClass}>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Podaci korisnika
-        </h2>
+        <h2 className="text-fg text-lg font-semibold">Podaci korisnika</h2>
         {updateState.error ? <Alert>{updateState.error}</Alert> : null}
         {updateState.message ? <Alert tone="success">{updateState.message}</Alert> : null}
         <input type="hidden" name="userId" value={user.id} />
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="firstName"
-              className="text-sm font-medium text-slate-700 dark:text-slate-200"
-            >
+            <label htmlFor="firstName" className="label">
               Ime
             </label>
             <input
@@ -81,10 +74,7 @@ export function UserAdminPanel({
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="lastName"
-              className="text-sm font-medium text-slate-700 dark:text-slate-200"
-            >
+            <label htmlFor="lastName" className="label">
               Prezime
             </label>
             <input
@@ -97,10 +87,7 @@ export function UserAdminPanel({
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="roleId"
-            className="text-sm font-medium text-slate-700 dark:text-slate-200"
-          >
+          <label htmlFor="roleId" className="label">
             Uloga
           </label>
           <select id="roleId" name="roleId" defaultValue={user.roleId} className={inputClass}>
@@ -118,25 +105,23 @@ export function UserAdminPanel({
 
       {/* Access credentials */}
       <form action={credFormAction} className={sectionClass}>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Pristupni podaci
-        </h2>
+        <h2 className="text-fg text-lg font-semibold">Pristupni podaci</h2>
         {credState.error ? <Alert>{credState.error}</Alert> : null}
         {credState.temporaryPassword ? (
           <div className="flex flex-col gap-2 rounded-md border border-amber-300 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+            <p className="text-sm font-medium text-amber-300">
               Privremena lozinka (prikazuje se samo jednom):
             </p>
-            <code className="block rounded bg-white px-3 py-2 font-mono text-lg tracking-wide text-slate-900 select-all dark:bg-slate-800 dark:text-slate-100">
+            <code className="bg-elevated text-fg block rounded px-3 py-2 font-mono text-lg tracking-wide select-all">
               {credState.temporaryPassword}
             </code>
-            <p className="text-xs text-amber-700 dark:text-amber-300">
+            <p className="text-xs text-amber-300/80">
               Zabilježite je i sigurno proslijedite korisniku. Korisnik je mora promijeniti pri
               prvoj prijavi.
             </p>
           </div>
         ) : (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-fg-muted text-sm">
             {isInactive
               ? "Račun je neaktivan. Generirajte privremenu lozinku za aktivaciju."
               : "Generiranjem nove privremene lozinke poništava se trenutna."}
@@ -158,15 +143,13 @@ export function UserAdminPanel({
 
       {/* Block / unblock */}
       <form action={blockFormAction} className={sectionClass}>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Status računa</h2>
+        <h2 className="text-fg text-lg font-semibold">Status računa</h2>
         {blockState.error ? <Alert>{blockState.error}</Alert> : null}
         {blockState.message ? <Alert tone="success">{blockState.message}</Alert> : null}
         <input type="hidden" name="userId" value={user.id} />
         <input type="hidden" name="blocked" value={isBlocked ? "false" : "true"} />
         {isSelf ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Ne možete mijenjati status vlastitog računa.
-          </p>
+          <p className="text-fg-muted text-sm">Ne možete mijenjati status vlastitog računa.</p>
         ) : (
           <div>
             <SubmitButton>{isBlocked ? "Odblokiraj račun" : "Blokiraj račun"}</SubmitButton>

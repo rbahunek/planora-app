@@ -14,12 +14,12 @@ export default async function NewTeamPage() {
   return (
     <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div>
-        <Link href="/timovi" className="text-sm text-slate-500 hover:underline dark:text-slate-400">
+        <Link href="/timovi" className="text-fg-muted hover:text-fg text-sm hover:underline">
           ← Natrag na timove
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">Novi tim</h1>
+        <h1 className="text-fg mt-2 text-2xl font-semibold tracking-tight">Novi tim</h1>
       </div>
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="card p-6">
         <TeamForm action={createTeamAction} submitLabel="Kreiraj tim" />
       </div>
     </div>

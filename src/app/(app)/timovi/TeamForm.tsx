@@ -28,10 +28,7 @@ export function TeamForm({
       {teamId ? <input type="hidden" name="teamId" value={teamId} /> : null}
       <FormField id="name" label="Naziv tima" defaultValue={defaults?.name} />
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="description"
-          className="text-sm font-medium text-slate-700 dark:text-slate-200"
-        >
+        <label htmlFor="description" className="label">
           Opis (nije obavezno)
         </label>
         <textarea
@@ -39,7 +36,7 @@ export function TeamForm({
           name="description"
           rows={3}
           defaultValue={defaults?.description ?? ""}
-          className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+          className="input"
         />
       </div>
       <div>

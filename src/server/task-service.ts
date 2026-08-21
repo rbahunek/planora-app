@@ -36,6 +36,20 @@ export async function listTasks(projectId: string, filters: TaskFilters = {}) {
   });
 }
 
+/** Tasks assigned to a specific user (across projects), for the "Zadaci" overview. */
+export async function listTasksAssignedTo(userId: string) {
+  return prisma.task.findMany({
+    where: { assigneeId: userId },
+    orderBy: [{ dueDate: "asc" }, { priority: { sortOrder: "desc" } }],
+    include: {
+      status: true,
+      priority: true,
+      project: { select: { id: true, name: true } },
+      labels: { include: { label: true } },
+    },
+  });
+}
+
 export async function getTask(id: string) {
   return prisma.task.findUnique({
     where: { id },

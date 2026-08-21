@@ -31,16 +31,14 @@ export default async function NewTaskPage({ params }: { params: Promise<{ id: st
       <div>
         <Link
           href={`/projekti/${id}`}
-          className="text-sm text-slate-500 hover:underline dark:text-slate-400"
+          className="text-fg-muted hover:text-fg text-sm hover:underline"
         >
           ← Natrag na projekt
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">
-          Novi zadatak
-        </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{project.name}</p>
+        <h1 className="text-fg mt-2 text-2xl font-semibold tracking-tight">Novi zadatak</h1>
+        <p className="text-fg-muted mt-1 text-sm">{project.name}</p>
       </div>
-      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="card p-6">
         <TaskForm
           action={createTaskAction}
           projectId={id}

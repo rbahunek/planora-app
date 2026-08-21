@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageHeader } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth/session";
 import { auditActionLabel } from "@/lib/labels";
 import { listAuditLogs } from "@/server/audit-service";
@@ -20,12 +21,16 @@ export default async function AuditLogPage() {
   const logs = await listAuditLogs();
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Dnevnik promjena</h1>
+    <div className="flex flex-col gap-7">
+      <PageHeader
+        eyebrow="Administracija"
+        title="Dnevnik promjena"
+        subtitle="Zapisi sigurnosno relevantnih događaja."
+      />
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="card overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+          <thead className="border-border bg-surface text-fg-subtle sticky top-0 border-b text-xs tracking-wide uppercase">
             <tr>
               <th className="px-4 py-3 font-medium">Vrijeme</th>
               <th className="px-4 py-3 font-medium">Radnja</th>
@@ -37,10 +42,7 @@ export default async function AuditLogPage() {
           <tbody>
             {logs.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-4 py-6 text-center text-slate-500 dark:text-slate-400"
-                >
+                <td colSpan={5} className="text-fg-muted px-4 py-6 text-center">
                   Nema zapisa.
                 </td>
               </tr>
@@ -48,21 +50,19 @@ export default async function AuditLogPage() {
               logs.map((log) => (
                 <tr
                   key={log.id}
-                  className="border-b border-slate-100 last:border-0 dark:border-slate-800"
+                  className="border-border hover:bg-surface-hover border-b transition-colors last:border-0"
                 >
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-500 dark:text-slate-400">
+                  <td className="mono text-fg-muted px-4 py-3 text-xs whitespace-nowrap">
                     {dateFmt.format(log.createdAt)}
                   </td>
-                  <td className="px-4 py-3 text-slate-900 dark:text-slate-100">
-                    {auditActionLabel(log.action)}
+                  <td className="px-4 py-3">
+                    <span className="mono pill border-accent/25 bg-accent/10 text-accent">
+                      {auditActionLabel(log.action)}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {personName(log.actor)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {personName(log.target)}
-                  </td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+                  <td className="text-fg-muted px-4 py-3">{personName(log.actor)}</td>
+                  <td className="text-fg-muted px-4 py-3">{personName(log.target)}</td>
+                  <td className="mono text-fg-subtle px-4 py-3 text-xs">
                     {log.metadata ? JSON.stringify(log.metadata) : "—"}
                   </td>
                 </tr>

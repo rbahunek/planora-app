@@ -12,20 +12,17 @@ export default async function AdminFeedbackPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+      <h1 className="text-fg text-2xl font-semibold tracking-tight">
         Povratne informacije korisnika
       </h1>
 
       {feedback.length === 0 ? (
-        <p className="text-slate-500 dark:text-slate-400">Nema povratnih informacija.</p>
+        <p className="text-fg-muted">Nema povratnih informacija.</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {feedback.map((item) => (
-            <li
-              key={item.id}
-              className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 dark:text-slate-500">
+            <li key={item.id} className="card p-4">
+              <div className="text-fg-subtle flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span>
                   {item.user.firstName} {item.user.lastName} · {item.user.email}
                 </span>
@@ -34,15 +31,13 @@ export default async function AdminFeedbackPage() {
                   {item.rating ? ` · Ocjena: ${item.rating}/5` : ""}
                 </span>
               </div>
-              <p className="mt-2 text-sm whitespace-pre-wrap text-slate-700 dark:text-slate-200">
-                {item.text}
-              </p>
+              <p className="text-fg mt-2 text-sm whitespace-pre-wrap">{item.text}</p>
               {item.attachmentUrl ? (
                 <a
                   href={item.attachmentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1 inline-block text-xs text-blue-600 hover:underline dark:text-blue-400"
+                  className="text-accent mt-1 inline-block text-xs hover:underline"
                 >
                   Privitak
                 </a>

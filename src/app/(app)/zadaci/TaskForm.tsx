@@ -10,9 +10,8 @@ type Option = { id: string; name: string; description?: string | null };
 type Person = { id: string; firstName: string; lastName: string };
 type Action = (state: TaskFormState, formData: FormData) => Promise<TaskFormState>;
 
-const inputClass =
-  "rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100";
-const labelClass = "text-sm font-medium text-slate-700 dark:text-slate-200";
+const inputClass = "input";
+const labelClass = "label";
 
 export function TaskForm({
   action,
@@ -125,7 +124,7 @@ export function TaskForm({
           ))}
         </select>
         {assignees.length === 0 ? (
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-fg-muted text-xs">
             Dodijelite tim projektu kako biste imali izvršitelje.
           </p>
         ) : null}
@@ -153,16 +152,13 @@ export function TaskForm({
           <span className={labelClass}>Oznake</span>
           <div className="flex flex-wrap gap-3">
             {labels.map((l) => (
-              <label
-                key={l.id}
-                className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200"
-              >
+              <label key={l.id} className="text-fg flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   name="labelIds"
                   value={l.id}
                   defaultChecked={selectedLabels.has(l.id)}
-                  className="h-4 w-4 rounded border-slate-300"
+                  className="border-border h-4 w-4 rounded"
                 />
                 {l.name}
               </label>

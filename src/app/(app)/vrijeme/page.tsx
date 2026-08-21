@@ -15,22 +15,20 @@ export default async function TimePage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
-          Evidencija vremena
-        </h1>
-        <span className="text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-fg text-2xl font-semibold tracking-tight">Evidencija vremena</h1>
+        <span className="text-fg-muted text-sm">
           Ukupno: <strong>{formatDuration(total)}</strong>
         </span>
       </div>
 
       {entries.length === 0 ? (
-        <p className="text-slate-500 dark:text-slate-400">
+        <p className="text-fg-muted">
           Još nemate evidentiranih unosa. Vrijeme evidentirate na stranici pojedinog zadatka.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="card overflow-x-auto">
           <table className="w-full min-w-[640px] text-left text-sm">
-            <thead className="border-b border-slate-200 text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <thead className="border-border text-fg-muted border-b">
               <tr>
                 <th className="px-4 py-3 font-medium">Datum</th>
                 <th className="px-4 py-3 font-medium">Zadatak</th>
@@ -41,33 +39,26 @@ export default async function TimePage() {
             </thead>
             <tbody>
               {entries.map((entry) => (
-                <tr
-                  key={entry.id}
-                  className="border-b border-slate-100 last:border-0 dark:border-slate-800"
-                >
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                <tr key={entry.id} className="border-border border-b last:border-0">
+                  <td className="text-fg-muted px-4 py-3 whitespace-nowrap">
                     {formatDate(entry.entryDate)}
                   </td>
                   <td className="px-4 py-3">
                     <Link
                       href={`/zadaci/${entry.task.id}`}
-                      className="text-slate-900 hover:underline dark:text-slate-100"
+                      className="text-fg hover:text-accent hover:underline"
                     >
                       {entry.task.name}
                     </Link>
-                    <span className="block text-xs text-slate-400 dark:text-slate-500">
-                      {entry.task.project.name}
-                    </span>
+                    <span className="text-fg-subtle block text-xs">{entry.task.project.name}</span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 dark:text-slate-300">
+                  <td className="text-fg-muted px-4 py-3 whitespace-nowrap">
                     {formatTime(entry.startTime)}–{formatTime(entry.endTime)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-100">
+                  <td className="text-fg px-4 py-3 whitespace-nowrap">
                     {formatDuration(entry.durationMinutes)}
                   </td>
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
-                    {entry.description ?? "—"}
-                  </td>
+                  <td className="text-fg-muted px-4 py-3">{entry.description ?? "—"}</td>
                 </tr>
               ))}
             </tbody>

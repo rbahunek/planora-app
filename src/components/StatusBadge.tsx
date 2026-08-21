@@ -1,15 +1,16 @@
 import { accountStatusLabel } from "@/lib/labels";
 
-const STYLES: Record<string, string> = {
-  ACTIVE: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  INACTIVE: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
-  BLOCKED: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+const STYLES: Record<string, { pill: string; dot: string }> = {
+  ACTIVE: { pill: "border-success/30 bg-success/10 text-green-300", dot: "bg-success" },
+  INACTIVE: { pill: "border-white/10 bg-white/5 text-fg-muted", dot: "bg-fg-subtle" },
+  BLOCKED: { pill: "border-danger/30 bg-danger/10 text-red-300", dot: "bg-danger" },
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  const style = STYLES[status] ?? STYLES.INACTIVE;
+  const s = STYLES[status] ?? STYLES.INACTIVE;
   return (
-    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${style}`}>
+    <span className={`pill ${s.pill}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
       {accountStatusLabel(status)}
     </span>
   );

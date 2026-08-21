@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ConfirmSubmit } from "@/components/ConfirmSubmit";
+import { IconArrowLeft } from "@/components/icons";
+import { PriorityBadge, TaskStatusBadge, UserAvatar } from "@/components/ui";
 import { canManage, canUpdateTaskStatus } from "@/lib/auth/rbac";
 import { requireUser } from "@/lib/auth/session";
 import { formatDate, toDateInputValue } from "@/lib/dates";
 import { listLabels } from "@/server/label-service";
-import { listPriorities, listProjectAssignees, listStatuses } from "@/server/task-service";
-import { getTask } from "@/server/task-service";
+import { getTask, listPriorities, listProjectAssignees, listStatuses } from "@/server/task-service";
 import { listTaskTimeEntriesForUser } from "@/server/time-service";
 
 import { deleteTaskAction, updateTaskAction } from "../actions";
@@ -17,8 +19,7 @@ import { TimeLog } from "./TimeLog";
 
 export const metadata: Metadata = { title: "Zadatak – Planora" };
 
-const sectionClass =
-  "flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900";
+const sectionClass = "card flex flex-col gap-4 p-6";
 
 export default async function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -46,71 +47,91 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       <div>
         <Link
           href={`/projekti/${task.project.id}`}
-          className="text-sm text-slate-500 hover:underline dark:text-slate-400"
+          className="mono text-fg-muted hover:text-fg inline-flex items-center gap-1.5 text-xs transition"
         >
-          ← {task.project.name}
+          <IconArrowLeft size={14} /> {task.project.name}
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">
-          {task.name}
-        </h1>
+        <div className="card mt-3 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <h1 className="text-fg text-2xl font-semibold tracking-tight">{task.name}</h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <PriorityBadge
+                name={task.priority.name}
+                label={task.priority.description ?? task.priority.name}
+              />
+              <TaskStatusBadge
+                name={task.status.name}
+                label={task.status.description ?? task.status.name}
+              />
+            </div>
+          </div>
+
+          <dl className="mt-5 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+            <div>
+              <dt className="text-fg-subtle text-xs">Izvršitelj</dt>
+              <dd className="text-fg mt-1.5 flex items-center gap-2">
+                {task.assignee ? (
+                  <>
+                    <UserAvatar
+                      firstName={task.assignee.firstName}
+                      lastName={task.assignee.lastName}
+                      size={24}
+                    />
+                    <span className="truncate">
+                      {task.assignee.firstName} {task.assignee.lastName}
+                    </span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-fg-subtle text-xs">Rok</dt>
+              <dd className="mono mt-1.5 text-amber-300">{formatDate(task.dueDate)}</dd>
+            </div>
+            <div>
+              <dt className="text-fg-subtle text-xs">Početak</dt>
+              <dd className="mono text-fg-muted mt-1.5">{formatDate(task.startDate)}</dd>
+            </div>
+            <div>
+              <dt className="text-fg-subtle text-xs">Oznake</dt>
+              <dd className="text-fg-muted mt-1.5">{task.labels.length}</dd>
+            </div>
+          </dl>
+
+          <p className="border-border text-fg-muted mt-5 border-t pt-4 text-sm whitespace-pre-wrap">
+            {task.description}
+          </p>
+          {task.labels.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1">
+              {task.labels.map(({ label }) => (
+                <span
+                  key={label.id}
+                  className="pill border-transparent text-[0.68rem]"
+                  style={{
+                    backgroundColor: `${label.color ?? "#334155"}22`,
+                    color: label.color ?? "#94a3b8",
+                  }}
+                >
+                  {label.name}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      {/* Overview */}
+      {/* Time tracking */}
       <div className={sectionClass}>
-        <dl className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <dt className="text-slate-500 dark:text-slate-400">Status</dt>
-            <dd className="text-slate-900 dark:text-slate-100">
-              {task.status.description ?? task.status.name}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-slate-500 dark:text-slate-400">Prioritet</dt>
-            <dd className="text-slate-900 dark:text-slate-100">
-              {task.priority.description ?? task.priority.name}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-slate-500 dark:text-slate-400">Izvršitelj</dt>
-            <dd className="text-slate-900 dark:text-slate-100">
-              {task.assignee ? `${task.assignee.firstName} ${task.assignee.lastName}` : "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-slate-500 dark:text-slate-400">Rok</dt>
-            <dd className="text-slate-900 dark:text-slate-100">{formatDate(task.dueDate)}</dd>
-          </div>
-        </dl>
-        <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-200">{task.description}</p>
-        {task.labels.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
-            {task.labels.map(({ label }) => (
-              <span
-                key={label.id}
-                className="rounded-full px-2 py-0.5 text-xs"
-                style={{ backgroundColor: label.color ?? "#e2e8f0", color: "#0f172a" }}
-              >
-                {label.name}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </div>
-
-      {/* Time tracking (any authenticated user logs their own time) */}
-      <div className={sectionClass}>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Evidencija vremena
-        </h2>
+        <h2 className="text-fg text-lg font-semibold">Evidencija vremena</h2>
         <TimeLog taskId={task.id} entries={timeEntries} />
       </div>
 
-      {/* Quick status update for assignees (managers use the full form below) */}
+      {/* Quick status update for assignees */}
       {canStatus && !isManager ? (
         <div className={sectionClass}>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Promjena statusa
-          </h2>
+          <h2 className="text-fg text-lg font-semibold">Promjena statusa</h2>
           <TaskStatusForm taskId={task.id} statuses={statuses} currentStatusId={task.statusId} />
         </div>
       ) : null}
@@ -119,9 +140,7 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
       {isManager ? (
         <>
           <div className={sectionClass}>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-              Uređivanje zadatka
-            </h2>
+            <h2 className="text-fg text-lg font-semibold">Uređivanje zadatka</h2>
             <TaskForm
               action={updateTaskAction}
               taskId={task.id}
@@ -143,17 +162,17 @@ export default async function TaskDetailPage({ params }: { params: Promise<{ id:
             />
           </div>
           <div className={sectionClass}>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Opasna zona</h2>
-            <form action={deleteTaskAction}>
-              <input type="hidden" name="taskId" value={task.id} />
-              <input type="hidden" name="projectId" value={task.project.id} />
-              <button
-                type="submit"
-                className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950"
-              >
-                Obriši zadatak
-              </button>
-            </form>
+            <h2 className="text-fg text-lg font-semibold">Opasna zona</h2>
+            <div>
+              <ConfirmSubmit
+                action={deleteTaskAction}
+                hidden={{ taskId: task.id, projectId: task.project.id }}
+                triggerLabel="Obriši zadatak"
+                title="Obrisati zadatak?"
+                description="Ova radnja je nepovratna."
+                confirmLabel="Obriši zadatak"
+              />
+            </div>
           </div>
         </>
       ) : null}

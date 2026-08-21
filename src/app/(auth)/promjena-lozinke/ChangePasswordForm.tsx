@@ -32,10 +32,10 @@ export function ChangePasswordForm() {
         type="password"
         autoComplete="new-password"
       />
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-fg-subtle text-xs">
         Najmanje 10 znakova, uključujući veliko i malo slovo te znamenku.
       </p>
-      <SubmitButton>Promijeni lozinku</SubmitButton>
+      <SubmitButton className="w-full">Promijeni lozinku</SubmitButton>
     </form>
   );
 }

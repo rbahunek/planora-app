@@ -18,10 +18,7 @@ export function AddMemberForm({ teamId, candidates }: { teamId: string; candidat
       <input type="hidden" name="teamId" value={teamId} />
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex min-w-[240px] flex-1 flex-col gap-1.5">
-          <label
-            htmlFor="userId"
-            className="text-sm font-medium text-slate-700 dark:text-slate-200"
-          >
+          <label htmlFor="userId" className="label">
             Dodaj člana
           </label>
           <select
@@ -29,7 +26,7 @@ export function AddMemberForm({ teamId, candidates }: { teamId: string; candidat
             name="userId"
             defaultValue=""
             disabled={candidates.length === 0}
-            className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm transition outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-400 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            className="input disabled:opacity-60"
           >
             <option value="" disabled>
               {candidates.length === 0 ? "Nema dostupnih korisnika" : "Odaberite korisnika…"}

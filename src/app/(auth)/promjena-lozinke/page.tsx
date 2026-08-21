@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 
+import { AnimatedPage } from "@/components/AnimatedPage";
+import { PlanoraWordmark } from "@/components/Brand";
+import { DotGridBackground } from "@/components/DotGridBackground";
 import { requireUser } from "@/lib/auth/session";
 
 import { ChangePasswordForm } from "./ChangePasswordForm";
@@ -12,24 +15,26 @@ export default async function ChangePasswordPage() {
   const user = await requireUser();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
-      <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
-            Promjena lozinke
-          </h1>
+    <main className="bg-background relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      <DotGridBackground />
+      <AnimatedPage className="relative w-full max-w-sm">
+        <div className="mb-7 flex justify-center">
+          <PlanoraWordmark />
+        </div>
+        <div className="card glow-accent p-7 sm:p-8">
+          <h1 className="text-fg text-xl font-semibold tracking-tight">Promjena lozinke</h1>
           {user.mustChangePassword ? (
-            <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+            <p className="border-warning/30 bg-warning/10 mt-2 rounded-lg border px-3 py-2 text-sm text-amber-300">
               Iz sigurnosnih razloga morate postaviti novu lozinku prije nastavka.
             </p>
           ) : (
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Ažurirajte lozinku svog računa.
-            </p>
+            <p className="text-fg-muted mt-1 text-sm">Ažurirajte lozinku svog računa.</p>
           )}
+          <div className="mt-6">
+            <ChangePasswordForm />
+          </div>
         </div>
-        <ChangePasswordForm />
-      </div>
+      </AnimatedPage>
     </main>
   );
 }

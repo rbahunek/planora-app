@@ -12,8 +12,7 @@ import { AddMemberForm } from "./AddMemberForm";
 
 export const metadata: Metadata = { title: "Tim – Planora" };
 
-const sectionClass =
-  "flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900";
+const sectionClass = "card flex flex-col gap-4 p-6";
 
 export default async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -28,17 +27,15 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <Link href="/timovi" className="text-sm text-slate-500 hover:underline dark:text-slate-400">
+        <Link href="/timovi" className="text-fg-muted hover:text-fg text-sm hover:underline">
           ← Natrag na timove
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-50">
-          {team.name}
-        </h1>
+        <h1 className="text-fg mt-2 text-2xl font-semibold tracking-tight">{team.name}</h1>
       </div>
 
       {isManager ? (
         <div className={sectionClass}>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Podaci tima</h2>
+          <h2 className="text-fg text-lg font-semibold">Podaci tima</h2>
           <TeamForm
             action={updateTeamAction}
             teamId={team.id}
@@ -48,32 +45,27 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
         </div>
       ) : team.description ? (
         <div className={sectionClass}>
-          <p className="text-slate-600 dark:text-slate-300">{team.description}</p>
+          <p className="text-fg-muted">{team.description}</p>
         </div>
       ) : null}
 
       <div className={sectionClass}>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-          Članovi ({team.members.length})
-        </h2>
+        <h2 className="text-fg text-lg font-semibold">Članovi ({team.members.length})</h2>
         {team.members.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">Tim još nema članova.</p>
+          <p className="text-fg-muted text-sm">Tim još nema članova.</p>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <ul className="divide-border divide-y">
             {team.members.map((member) => (
               <li key={member.user.id} className="flex items-center justify-between py-2">
-                <span className="text-sm text-slate-700 dark:text-slate-200">
+                <span className="text-fg text-sm">
                   {member.user.firstName} {member.user.lastName}
-                  <span className="text-slate-400 dark:text-slate-500"> · {member.user.email}</span>
+                  <span className="text-fg-subtle"> · {member.user.email}</span>
                 </span>
                 {isManager ? (
                   <form action={removeMemberAction}>
                     <input type="hidden" name="teamId" value={team.id} />
                     <input type="hidden" name="userId" value={member.user.id} />
-                    <button
-                      type="submit"
-                      className="text-sm text-red-600 hover:underline dark:text-red-400"
-                    >
+                    <button type="submit" className="text-sm text-red-400 hover:underline">
                       Ukloni
                     </button>
                   </form>
@@ -87,13 +79,10 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
 
       {isManager ? (
         <div className={sectionClass}>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-50">Opasna zona</h2>
+          <h2 className="text-fg text-lg font-semibold">Opasna zona</h2>
           <form action={deleteTeamAction}>
             <input type="hidden" name="teamId" value={team.id} />
-            <button
-              type="submit"
-              className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950"
-            >
+            <button type="submit" className="btn btn-danger">
               Obriši tim
             </button>
           </form>

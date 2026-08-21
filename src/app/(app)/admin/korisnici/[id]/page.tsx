@@ -25,17 +25,17 @@ export default async function UserDetailPage({ params }: { params: Promise<{ id:
       <div>
         <Link
           href="/admin/korisnici"
-          className="text-sm text-slate-500 hover:underline dark:text-slate-400"
+          className="text-fg-muted hover:text-fg text-sm hover:underline"
         >
           ← Natrag na korisnike
         </Link>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">
+          <h1 className="text-fg text-2xl font-semibold tracking-tight">
             {user.firstName} {user.lastName}
           </h1>
           <StatusBadge status={user.accountStatus} />
         </div>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-fg-muted mt-1 text-sm">
           {user.email} · {roleLabel(user.role.name)}
           {user.mustChangePassword ? " · mora promijeniti lozinku" : ""}
         </p>

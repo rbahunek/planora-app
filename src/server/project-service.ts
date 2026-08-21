@@ -3,10 +3,27 @@ import type { ServiceResult } from "@/server/result";
 import type { ProjectInput } from "@/validation/project";
 
 export async function listProjects() {
-  return prisma.project.findMany({
+  const projects = await prisma.project.findMany({
     orderBy: { startDate: "desc" },
-    include: { _count: { select: { tasks: true, teams: true } } },
+    include: {
+      _count: { select: { tasks: true, teams: true } },
+      tasks: { select: { status: { select: { name: true } } } },
+    },
   });
+  return projects.map((p) => {
+    const { tasks, ...rest } = p;
+    const total = tasks.length;
+    const done = tasks.filter((t) => t.status.name === "DONE").length;
+    return { ...rest, progress: total === 0 ? 0 : Math.round((done / total) * 100) };
+  });
+}
+
+export async function getProjectProgress(projectId: string) {
+  const [total, done] = await Promise.all([
+    prisma.task.count({ where: { projectId } }),
+    prisma.task.count({ where: { projectId, status: { name: "DONE" } } }),
+  ]);
+  return { total, done, progress: total === 0 ? 0 : Math.round((done / total) * 100) };
 }
 
 export async function getProject(id: string) {

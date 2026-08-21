@@ -20,9 +20,8 @@ type Entry = {
   description: string | null;
 };
 
-const inputClass =
-  "rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100";
-const labelClass = "text-sm font-medium text-slate-700 dark:text-slate-200";
+const inputClass = "input";
+const labelClass = "label";
 
 export function TimeLog({ taskId, entries }: { taskId: string; entries: Entry[] }) {
   const [state, formAction] = useActionState<TimeEntryFormState, FormData>(
@@ -77,27 +76,22 @@ export function TimeLog({ taskId, entries }: { taskId: string; entries: Entry[] 
 
       {entries.length > 0 ? (
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            Vaši unosi (ukupno {formatDuration(total)})
-          </p>
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <p className="label">Vaši unosi (ukupno {formatDuration(total)})</p>
+          <ul className="divide-border divide-y">
             {entries.map((entry) => (
               <li key={entry.id} className="flex items-center justify-between gap-2 py-2 text-sm">
-                <span className="text-slate-700 dark:text-slate-200">
+                <span className="text-fg">
                   {formatDate(entry.entryDate)} · {formatTime(entry.startTime)}–
                   {formatTime(entry.endTime)} ·{" "}
                   <strong>{formatDuration(entry.durationMinutes)}</strong>
                   {entry.description ? (
-                    <span className="text-slate-500 dark:text-slate-400">
-                      {" "}
-                      · {entry.description}
-                    </span>
+                    <span className="text-fg-muted"> · {entry.description}</span>
                   ) : null}
                 </span>
                 <form action={deleteTimeEntryAction}>
                   <input type="hidden" name="entryId" value={entry.id} />
                   <input type="hidden" name="taskId" value={taskId} />
-                  <button type="submit" className="text-red-600 hover:underline dark:text-red-400">
+                  <button type="submit" className="text-red-400 hover:underline">
                     Obriši
                   </button>
                 </form>

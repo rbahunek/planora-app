@@ -6,9 +6,8 @@ import { Alert, FormField, SubmitButton } from "@/components/forms";
 
 import { createFeedbackAction, type FeedbackFormState } from "./actions";
 
-const inputClass =
-  "rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100";
-const labelClass = "text-sm font-medium text-slate-700 dark:text-slate-200";
+const inputClass = "input";
+const labelClass = "label";
 
 export function FeedbackForm() {
   const [state, formAction] = useActionState<FeedbackFormState, FormData>(createFeedbackAction, {});

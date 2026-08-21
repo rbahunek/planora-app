@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Stagger, StaggerItem } from "@/components/AnimatedPage";
+import { IconPlus, IconProjects } from "@/components/icons";
+import { EmptyState, PageHeader, ProgressBar } from "@/components/ui";
 import { canManage } from "@/lib/auth/rbac";
 import { requireUser } from "@/lib/auth/session";
 import { formatDate } from "@/lib/dates";
@@ -14,46 +17,61 @@ export default async function ProjectsPage() {
   const projects = await listProjects();
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Projekti</h1>
-        {isManager ? (
-          <Link
-            href="/projekti/novi"
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-          >
-            Novi projekt
-          </Link>
-        ) : null}
-      </div>
+    <div className="flex flex-col gap-7">
+      <PageHeader
+        eyebrow="Projekti"
+        title="Projekti"
+        subtitle="Svi projekti i njihov napredak."
+        actions={
+          isManager ? (
+            <Link href="/projekti/novi" className="btn btn-primary">
+              <IconPlus size={16} />
+              Novi projekt
+            </Link>
+          ) : null
+        }
+      />
 
       {projects.length === 0 ? (
-        <p className="text-slate-500 dark:text-slate-400">Još nema projekata.</p>
+        <EmptyState
+          icon={<IconProjects size={22} />}
+          title="Još nema projekata"
+          description={isManager ? "Kreirajte prvi projekt." : "Projekti će se pojaviti ovdje."}
+          action={
+            isManager ? (
+              <Link href="/projekti/novi" className="btn btn-primary">
+                Novi projekt
+              </Link>
+            ) : undefined
+          }
+        />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {projects.map((project) => (
-            <li key={project.id}>
+        <Stagger className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {projects.map((p) => (
+            <StaggerItem key={p.id}>
               <Link
-                href={`/projekti/${project.id}`}
-                className="block rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                href={`/projekti/${p.id}`}
+                className="card card-interactive flex h-full flex-col gap-4 p-5"
               >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-medium text-slate-900 dark:text-slate-100">{project.name}</p>
-                  <span className="text-xs text-slate-400 dark:text-slate-500">
-                    {formatDate(project.startDate)}
-                    {project.endDate ? ` – ${formatDate(project.endDate)}` : ""}
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-fg font-medium">{p.name}</p>
+                  <span className="mono text-fg-subtle shrink-0 text-xs">{p.progress}%</span>
+                </div>
+                <p className="text-fg-muted line-clamp-2 flex-1 text-sm">{p.description}</p>
+                <ProgressBar value={p.progress} tone={p.progress === 100 ? "success" : "accent"} />
+                <div className="text-fg-subtle flex items-center justify-between text-xs">
+                  <span>
+                    {p._count.tasks} zadataka · {p._count.teams} timova
+                  </span>
+                  <span className="mono">
+                    {formatDate(p.startDate)}
+                    {p.endDate ? ` – ${formatDate(p.endDate)}` : ""}
                   </span>
                 </div>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
-                  {project.description}
-                </p>
-                <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-                  {project._count.tasks} zadataka · {project._count.teams} timova
-                </p>
               </Link>
-            </li>
+            </StaggerItem>
           ))}
-        </ul>
+        </Stagger>
       )}
     </div>
   );
