@@ -6,7 +6,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 // supports transactions and works on both Node and Vercel serverless.
 // Runtime connects through the POOLED connection string (DATABASE_URL);
 // migrations use DIRECT_URL via prisma.config.ts.
-function createPrismaClient() {
+function createPrismaClient(): PrismaClient {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("DATABASE_URL is not set. Copy .env.example to .env.local and fill it in.");
@@ -15,12 +15,23 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-const globalForPrisma = globalThis as unknown as {
-  prisma?: ReturnType<typeof createPrismaClient>;
-};
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+function getPrismaClient(): PrismaClient {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
+  return globalForPrisma.prisma;
 }
+
+// Lazy proxy: the underlying client is created only on the first actual use
+// (a query/property access), NOT when this module is imported. This lets
+// `next build` collect page data without DATABASE_URL being set — the env var
+// is only required when a request actually touches the database at runtime.
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop, receiver) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client, prop, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
