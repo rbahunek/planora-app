@@ -4,6 +4,7 @@ import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { signIn } from "@/auth";
+import { safeCallbackUrl } from "@/lib/auth/redirects";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/validation/auth";
 
@@ -13,6 +14,9 @@ export async function loginAction(
   _prevState: LoginFormState,
   formData: FormData,
 ): Promise<LoginFormState> {
+  // Validate the requested redirect target to an internal path (no open redirects).
+  const callbackUrl = safeCallbackUrl(formData.get("callbackUrl")?.toString());
+
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -37,11 +41,11 @@ export async function loginAction(
   }
 
   // Decide the destination server-side (a single server-action redirect is
-  // followed reliably by the client router). Users who must change their
-  // password go straight to that flow; middleware/layout enforce it thereafter.
+  // followed reliably by the client router). A forced password change takes
+  // precedence; otherwise return the user to the validated callback URL.
   const user = await prisma.user.findUnique({
     where: { email: parsed.data.email },
     select: { mustChangePassword: true },
   });
-  redirect(user?.mustChangePassword ? "/promjena-lozinke" : "/dashboard");
+  redirect(user?.mustChangePassword ? "/promjena-lozinke" : callbackUrl);
 }

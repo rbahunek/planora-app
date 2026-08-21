@@ -1,12 +1,24 @@
 import type { Metadata } from "next";
 
+import { safeCallbackUrl } from "@/lib/auth/redirects";
+
 import { LoginForm } from "./LoginForm";
 
 export const metadata: Metadata = {
   title: "Prijava – Planora",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const rawCallback = Array.isArray(sp.callbackUrl) ? sp.callbackUrl[0] : sp.callbackUrl;
+  // Sanitize here too so the hidden field never carries an off-site URL; the
+  // server action re-validates it as the real security boundary.
+  const callbackUrl = safeCallbackUrl(rawCallback);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
       <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -16,7 +28,7 @@ export default function LoginPage() {
             Prijavite se u svoj račun
           </p>
         </div>
-        <LoginForm />
+        <LoginForm callbackUrl={callbackUrl} />
       </div>
     </main>
   );
