@@ -1,0 +1,245 @@
+// Planora – Prisma schema
+// Language policy: code/DB/API in English. Visible UI in Croatian.
+// Prisma 7 uses the query compiler + driver adapters (see src/lib/prisma.ts).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Connection URLs live in prisma.config.ts (Prisma 7):
+  //   - migrations/CLI use DIRECT_URL
+  //   - runtime uses the Neon driver adapter with pooled DATABASE_URL (src/lib/prisma.ts)
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum AccountStatus {
+  INACTIVE
+  ACTIVE
+  BLOCKED
+}
+
+// ---------------------------------------------------------------------------
+// Users, roles, teams
+// ---------------------------------------------------------------------------
+
+model User {
+  id                  String        @id @default(uuid()) @db.Uuid
+  firstName           String
+  lastName            String
+  email               String        @unique
+  passwordHash        String? // nullable before activation; never exposed via API
+  roleId              String        @db.Uuid
+  accountStatus       AccountStatus @default(INACTIVE)
+  mustChangePassword  Boolean       @default(false)
+  failedLoginAttempts Int           @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
+  createdById         String?       @db.Uuid
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  role          Role        @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdBy     User?       @relation("UserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdUsers  User[]      @relation("UserCreatedBy")
+  teams         UserTeam[]
+  tasksCreated  Task[]      @relation("TaskCreatedBy")
+  tasksAssigned Task[]      @relation("TaskAssignee")
+  timeEntries   TimeEntry[]
+  feedback      Feedback[]
+  auditActed    AuditLog[]  @relation("AuditActor")
+  auditTargeted AuditLog[]  @relation("AuditTarget")
+
+  @@index([roleId])
+  @@index([accountStatus])
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+}
+
+model Team {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members  UserTeam[]
+  projects ProjectTeam[]
+}
+
+model UserTeam {
+  userId   String   @db.Uuid
+  teamId   String   @db.Uuid
+  joinedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([userId, teamId])
+  @@index([teamId])
+}
+
+// ---------------------------------------------------------------------------
+// Projects and tasks
+// ---------------------------------------------------------------------------
+
+model Project {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  teams ProjectTeam[]
+  tasks Task[]
+}
+
+model ProjectTeam {
+  projectId String @db.Uuid
+  teamId    String @db.Uuid
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, teamId])
+  @@index([teamId])
+}
+
+model Task {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+  statusId    String    @db.Uuid
+  priorityId  String    @db.Uuid
+  startDate   DateTime?
+  dueDate     DateTime?
+  projectId   String    @db.Uuid
+  assigneeId  String?   @db.Uuid
+  createdById String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  status      Status      @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  priority    Priority    @relation(fields: [priorityId], references: [id], onDelete: Restrict)
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee    User?       @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  createdBy   User        @relation("TaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  labels      TaskLabel[]
+  timeEntries TimeEntry[]
+
+  @@index([projectId])
+  @@index([statusId])
+  @@index([priorityId])
+  @@index([assigneeId])
+}
+
+model Status {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+  sortOrder   Int
+
+  tasks Task[]
+}
+
+model Priority {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+  sortOrder   Int
+
+  tasks Task[]
+}
+
+model Label {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique
+  description String?
+  color       String?
+
+  tasks TaskLabel[]
+}
+
+model TaskLabel {
+  taskId  String @db.Uuid
+  labelId String @db.Uuid
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@index([labelId])
+}
+
+// ---------------------------------------------------------------------------
+// Time tracking and feedback
+// ---------------------------------------------------------------------------
+
+model TimeEntry {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  taskId          String   @db.Uuid
+  entryDate       DateTime @db.Date
+  startTime       DateTime
+  endTime         DateTime
+  durationMinutes Int // computed on the server; end must be after start
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([taskId])
+  @@index([entryDate])
+}
+
+model Feedback {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  text          String
+  rating        Int? // validated range when present (see Zod schema)
+  attachmentUrl String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Audit log
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  actorUserId  String   @db.Uuid
+  targetUserId String?  @db.Uuid
+  action       String
+  metadata     Json? // never store passwords, hashes, or session values
+  createdAt    DateTime @default(now())
+
+  actor  User  @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+  target User? @relation("AuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId])
+  @@index([targetUserId])
+  @@index([action])
+  @@index([createdAt])
+}
